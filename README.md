@@ -74,6 +74,22 @@ Use Mongoose's `.populate('reviewedBy')` on `getAllReviews`/`getReview` so
 the response includes the referenced user's `name`/`email` instead of just
 an id.
 
+## Implementation notes
+
+The review API is now wired with `POST /api/reviews`, `GET /api/reviews`,
+`GET /api/reviews/:id`, `PATCH /api/reviews/:id`, and
+`DELETE /api/reviews/:id`. `GET /api/reviews/summary?courseCode=CS101`
+uses Mongoose `aggregate()` with `$match`, `$group`, and `$project` to compute
+the average and count in MongoDB. Reviews returned by the list, detail, and
+create/update endpoints populate `reviewedBy` with the user's `name` and
+`email`.
+
+Joi validates create/update payloads before database calls; Mongoose validators
+remain enabled for updates. Invalid ids return `400`, missing reviews return
+`404`, and compound-index conflicts return `409`. The static `/summary` route
+is registered before `/:id`, because Express otherwise treats `summary` as a
+dynamic id.
+
 You're expected to use AI tools while building this — that's fine and
 expected. But you should be able to explain, for any line in your
 controller, *why* it's there and what happens if you delete it. We will ask.
